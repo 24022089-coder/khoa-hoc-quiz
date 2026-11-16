@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Online KHTN 9 · Bài 7: Lăng kính &amp; Bài 8: Thấu kính</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+  <div id="app" class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+    <!-- Header -->
+    <header class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+          KHTN 9 · Kết nối tri thức
+        </span>
+        <h1 class="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          Quiz Online: Lăng kính &amp; Thấu kính
+        </h1>
+      </div>
+      <button id="btn-sound" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-100">
+        <span id="sound-icon" class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+        <span id="sound-label">Âm thanh: Bật</span>
+      </button>
+    </header>
+
+    <!-- LOBBY VIEW -->
+    <section id="view-lobby" class="space-y-5">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <h2 class="text-base font-semibold text-slate-900">1. Chọn nội dung ôn tập</h2>
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3" id="topic-group">
+          <button type="button" data-topic="all" class="topic-card rounded-xl border-2 border-indigo-600 bg-indigo-50/70 p-4 text-left transition">
+            <div class="text-sm font-semibold text-indigo-900">Tất cả (16 câu)</div>
+            <div class="mt-1 text-xs text-indigo-700">Tổng hợp Bài 7 &amp; Bài 8</div>
+          </button>
+          <button type="button" data-topic="7" class="topic-card rounded-xl border-2 border-slate-200 bg-white p-4 text-left transition hover:border-slate-300">
+            <div class="text-sm font-semibold text-slate-900">Bài 7: Lăng kính</div>
+            <div class="mt-1 text-xs text-slate-500">8 câu · Trang 34</div>
+          </button>
+          <button type="button" data-topic="8" class="topic-card rounded-xl border-2 border-slate-200 bg-white p-4 text-left transition hover:border-slate-300">
+            <div class="text-sm font-semibold text-slate-900">Bài 8: Thấu kính</div>
+            <div class="mt-1 text-xs text-slate-500">8 câu · Trang 40</div>
+          </button>
+        </div>
+
+        <h2 class="mt-6 text-base font-semibold text-slate-900">2. Chế độ làm bài</h2>
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button id="toggle-timer" type="button" class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:bg-slate-100">
+            <div>
+              <div class="text-sm font-medium text-slate-900">Đếm ngược 30 giây/câu</div>
+              <div class="text-xs text-slate-500">Tạo áp lực thời gian như thi online</div>
+            </div>
+            <span id="timer-badge" class="rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white">Bật</span>
+          </button>
+          <button id="toggle-shuffle" type="button" class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:bg-slate-100">
+            <div>
+              <div class="text-sm font-medium text-slate-900">Trộn thứ tự câu hỏi</div>
+              <div class="text-xs text-slate-500">Đảo ngẫu nhiên mỗi lượt làm</div>
+            </div>
+            <span id="shuffle-badge" class="rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white">Bật</span>
+          </button>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
+          <div class="text-xs text-slate-500">
+            Phím tắt: <span class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">1-4</span> hoặc <span class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">A-D</span> để chọn, <span class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">Enter</span> để sang câu tiếp.
+          </div>
+          <button id="btn-start" type="button" class="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:w-auto">
+            Bắt đầu làm bài
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLAYING VIEW -->
+    <section id="view-play" class="hidden space-y-4">
+      <!-- Top stats bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span id="play-progress" class="tabular-nums text-sm font-semibold text-slate-900">Câu 1 / 16</span>
+          <span id="play-topic" class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">Bài 7</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-xs text-slate-500">
+            Chuỗi đúng: <span id="play-streak" class="tabular-nums font-semibold text-amber-600">0</span>
+          </div>
+          <div class="text-xs text-slate-500">
+            Điểm: <span id="play-score" class="tabular-nums font-semibold text-indigo-600">0</span>
+          </div>
+          <div id="timer-pill" class="tabular-nums rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">
+            30s
+          </div>
+          <button id="btn-quit" type="button" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100">
+            Thoát
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress / Timer bar -->
+      <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+        <div id="timer-bar" class="h-full w-full rounded-full bg-indigo-600 transition-all duration-200"></div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <p id="q-text" class="text-base font-semibold leading-relaxed text-slate-900 sm:text-lg"></p>
+        <div id="q-diagram" class="mt-4 hidden justify-center rounded-xl bg-slate-50 p-3"></div>
+
+        <div id="options-grid" class="mt-5 grid grid-cols-1 gap-3"></div>
+
+        <!-- Feedback -->
+        <div id="feedback-box" class="mt-5 hidden rounded-xl border p-4">
+          <div id="feedback-title" class="text-sm font-semibold"></div>
+          <p id="feedback-explain" class="mt-1 text-sm leading-relaxed text-slate-700"></p>
+        </div>
+
+        <div class="mt-5 flex items-center justify-end">
+          <button id="btn-next" type="button" disabled class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300">
+            Câu tiếp theo →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS VIEW -->
+    <section id="view-results" class="hidden space-y-5">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Kết quả bài làm</div>
+        <div id="res-pct" class="tabular-nums mt-2 text-4xl font-bold text-slate-900">0%</div>
+        <p id="res-subtitle" class="mt-1 text-sm text-slate-600"></p>
+
+        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div class="rounded-xl bg-slate-50 p-3">
+            <div class="text-xs text-slate-500">Tổng điểm</div>
+            <div id="res-score" class="tabular-nums mt-1 text-lg font-bold text-indigo-600">0</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3">
+            <div class="text-xs text-slate-500">Số câu đúng</div>
+            <div id="res-correct" class="tabular-nums mt-1 text-lg font-bold text-emerald-600">0 / 0</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3">
+            <div class="text-xs text-slate-500">Chuỗi cao nhất</div>
+            <div id="res-streak" class="tabular-nums mt-1 text-lg font-bold text-amber-600">0</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-3">
+            <div class="text-xs text-slate-500">Thời gian</div>
+            <div id="res-time" class="tabular-nums mt-1 text-lg font-bold text-slate-800">0s</div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button id="btn-retry-wrong" type="button" class="hidden rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600">
+            Ôn lại câu sai
+          </button>
+          <button id="btn-retry-all" type="button" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+            Làm lại
+          </button>
+          <button id="btn-home" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+            Về màn hình chính
+          </button>
+          <button id="btn-copy-res" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+            Sao chép kết quả
+          </button>
+        </div>
+        <div id="copy-toast" class="mt-2 hidden text-xs font-medium text-emerald-600">Đã sao chép kết quả vào bộ nhớ tạm.</div>
+      </div>
+
+      <!-- Review list -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-slate-900">Chi tiết từng câu</h2>
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-medium" id="review-filter">
+            <button type="button" data-rfilter="all" class="rfilter-btn rounded-lg bg-white px-3 py-1.5 text-slate-900 shadow-sm">Tất cả</button>
+            <button type="button" data-rfilter="wrong" class="rfilter-btn rounded-lg px-3 py-1.5 text-slate-600">Câu sai</button>
+            <button type="button" data-rfilter="correct" class="rfilter-btn rounded-lg px-3 py-1.5 text-slate-600">Câu đúng</button>
+          </div>
+        </div>
+        <div id="review-list" class="mt-4 space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- Quit Confirm Modal -->
+    <div id="quit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4">
+      <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+        <h3 class="text-base font-semibold text-slate-900">Thoát lượt làm bài?</h3>
+        <p class="mt-1.5 text-sm text-slate-600">Tiến độ của lượt làm hiện tại sẽ không được lưu.</p>
+        <div class="mt-5 flex justify-end gap-2">
+          <button id="modal-cancel" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Tiếp tục làm</button>
+          <button id="modal-confirm" type="button" class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">Thoát</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const QUESTION_BANK = [
+      // BÀI 7: LĂNG KÍNH (8 câu)
+      {
+        id: 'p1', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Lăng kính là một khối chất trong suốt, đồng chất, thường có dạng lăng trụ tam giác và được giới hạn bởi:',
+        options: [
+          'Hai mặt phẳng song song với nhau',
+          'Hai mặt phẳng không song song với nhau',
+          'Hai mặt cầu lồi đối xứng nhau',
+          'Một mặt phẳng và một mặt cầu lõm'
+        ],
+        answer: 1,
+        explain: 'Theo SGK KHTN 9 (Kết nối tri thức), lăng kính là khối trong suốt, đồng chất, giới hạn bởi hai mặt phẳng không song song, thường có dạng lăng trụ hình tam giác.'
+      },
+      {
+        id: 'p2', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Về phương diện quang hình học, một lăng kính được đặc trưng bởi hai yếu tố nào?',
+        options: [
+          'Góc chiết quang A và chiết suất n của chất làm lăng kính',
+          'Tiêu cự f và quang tâm O',
+          'Chiều cao lăng trụ và diện tích mặt đáy',
+          'Độ dày ở rìa và bán kính mặt cong'
+        ],
+        answer: 0,
+        explain: 'Một lăng kính được đặc trưng bởi góc chiết quang A (góc tạo bởi hai mặt bên) và chiết suất n của chất làm lăng kính.'
+      },
+      {
+        id: 'p3', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Quan sát hình vẽ đường truyền tia sáng đơn sắc từ không khí qua lăng kính. Tia ló ra khỏi lăng kính bị lệch như thế nào so với tia tới?',
+        svg: `<svg viewBox="0 0 320 150" class="h-36 w-auto" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="160,20 85,130 235,130" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
+          <text x="160" y="14" text-anchor="middle" font-size="12" fill="#334155">Đỉnh (A)</text>
+          <text x="160" y="145" text-anchor="middle" font-size="12" fill="#334155">Đáy lăng kính</text>
+          <line x1="30" y1="88" x2="118" y2="75" stroke="#e11d48" stroke-width="2.2"/>
+          <line x1="118" y1="75" x2="195" y2="78" stroke="#e11d48" stroke-width="2.2"/>
+          <line x1="195" y1="78" x2="285" y2="115" stroke="#e11d48" stroke-width="2.2"/>
+          <line x1="118" y1="75" x2="260" y2="54" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="48" y="78" font-size="12" fill="#e11d48">Tia tới</text>
+          <text x="262" y="102" font-size="12" fill="#e11d48">Tia ló</text>
+        </svg>`,
+        options: [
+          'Lệch về phía đỉnh của lăng kính',
+          'Lệch về phía đáy của lăng kính',
+          'Truyền thẳng theo phương của tia tới',
+          'Bị phản xạ toàn phần ngay tại mặt thứ nhất'
+        ],
+        answer: 1,
+        explain: 'Khi tia sáng đơn sắc truyền từ không khí vào mặt bên của lăng kính, tia ló ra khỏi lăng kính luôn lệch về phía đáy so với tia tới.'
+      },
+      {
+        id: 'p4', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Hiện tượng tán sắc ánh sáng xảy ra khi chiếu chùm ánh sáng trắng hẹp qua lăng kính là do:',
+        options: [
+          'Lăng kính tự nhuộm màu cho các tia sáng đi qua nó',
+          'Lăng kính tách riêng các chùm sáng màu có sẵn trong chùm sáng trắng theo các phương khác nhau',
+          'Ánh sáng trắng bị hấp thụ hoàn toàn chỉ còn lại 7 màu',
+          'Mặt đáy của lăng kính phản xạ ánh sáng tạo thành cầu vồng'
+        ],
+        answer: 1,
+        explain: 'Lăng kính có tác dụng tách riêng các chùm sáng màu có sẵn trong chùm ánh sáng trắng cho mỗi chùm đi theo một phương khác nhau, tạo thành quang phổ của ánh sáng trắng.'
+      },
+      {
+        id: 'p5', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Trong quang phổ của ánh sáng trắng thu được qua lăng kính (dải màu từ đỏ đến tím), nhận định nào đúng về góc lệch?',
+        options: [
+          'Tia đỏ lệch nhiều nhất, tia tím lệch ít nhất',
+          'Tia đỏ lệch ít nhất, tia tím lệch nhiều nhất',
+          'Tia vàng và tia lục lệch bằng tia tím',
+          'Mọi tia màu đều có cùng chiết suất nên lệch như nhau'
+        ],
+        answer: 1,
+        explain: 'Chiết suất của lăng kính nhỏ nhất đối với tia đỏ và lớn nhất đối với tia tím, vì vậy tia đỏ bị lệch ít nhất còn tia tím bị lệch nhiều nhất.'
+      },
+      {
+        id: 'p6', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Ánh sáng đơn sắc có tính chất đặc trưng nào sau đây?',
+        options: [
+          'Có một màu nhất định và không bị tán sắc khi đi qua lăng kính',
+          'Luôn tách thành 7 màu khi truyền qua lăng kính thủy tinh',
+          'Không bị khúc xạ khi truyền từ không khí vào nước',
+          'Chỉ tồn tại trong phòng thí nghiệm chân không'
+        ],
+        answer: 0,
+        explain: 'Ánh sáng đơn sắc là ánh sáng có một màu nhất định và không bị tán sắc khi đi qua lăng kính.'
+      },
+      {
+        id: 'p7', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Dưới ánh sáng trắng, một bông hoa hồng có màu đỏ vì sao?',
+        options: [
+          'Bông hoa tự phát ra ánh sáng màu đỏ trong bóng tối',
+          'Bông hoa hấp thụ ánh sáng màu đỏ và phản xạ các màu còn lại',
+          'Bông hoa phản xạ ánh sáng màu đỏ vào mắt ta và hấp thụ những màu còn lại',
+          'Bông hoa cho tất cả các màu đi xuyên qua'
+        ],
+        answer: 2,
+        explain: 'Dưới ánh sáng trắng, vật có màu nào là do nó phản xạ ánh sáng màu đó vào mắt ta và hấp thụ các màu còn lại.'
+      },
+      {
+        id: 'p8', lesson: 7, topic: 'Bài 7 · Lăng kính',
+        q: 'Chiếu chùm ánh sáng trắng qua một tấm lọc màu xanh lục. Ánh sáng ló ra khỏi tấm lọc có màu gì và vì sao?',
+        options: [
+          'Màu trắng, vì tấm lọc không hấp thụ ánh sáng',
+          'Màu đen, vì tấm lọc hấp thụ toàn bộ ánh sáng trắng',
+          'Màu xanh lục, vì tấm lọc màu xanh lục hấp thụ ít ánh sáng màu xanh lục nhưng hấp thụ mạnh các màu khác',
+          'Màu đỏ, vì màu đỏ là màu bổ sung của xanh lục'
+        ],
+        answer: 2,
+        explain: 'Tấm lọc màu nào thì hấp thụ ít ánh sáng có màu đó và hấp thụ mạnh ánh sáng có màu khác, nên dùng để tạo ra ánh sáng đơn sắc gần đúng.'
+      },
+
+      // BÀI 8: THẤU KÍNH (8 câu)
+      {
+        id: 'l1', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Dựa vào hình dạng tiết diện bên dưới, thấu kính A và B lần lượt là loại nào?',
+        svg: `<svg viewBox="0 0 320 120" class="h-28 w-auto" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 85 15 Q 112 60 85 105 Q 58 60 85 15 Z" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <text x="85" y="118" text-anchor="middle" font-size="12" fill="#1e293b">Hình A</text>
+          <path d="M 215 15 L 255 15 Q 238 60 255 105 L 215 105 Q 232 60 215 15 Z" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="235" y="118" text-anchor="middle" font-size="12" fill="#1e293b">Hình B</text>
+        </svg>`,
+        options: [
+          'A là thấu kính phân kì, B là thấu kính hội tụ',
+          'A là thấu kính hội tụ (rìa mỏng), B là thấu kính phân kì (rìa dày)',
+          'Cả A và B đều là thấu kính hội tụ',
+          'Cả A và B đều là thấu kính phân kì'
+        ],
+        answer: 1,
+        explain: 'Hình A có phần rìa mỏng hơn phần ở giữa nên là thấu kính hội tụ; Hình B có phần rìa dày hơn phần ở giữa nên là thấu kính phân kì.'
+      },
+      {
+        id: 'l2', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Khi giải thích sự truyền ánh sáng qua thấu kính hội tụ bằng cách ghép các lăng kính nhỏ liền nhau, các lăng kính nhỏ được xếp sao cho:',
+        options: [
+          'Đáy các lăng kính đều hướng ra xa trục chính',
+          'Đáy các lăng kính đều hướng về phía trục chính',
+          'Đỉnh các lăng kính hướng về phía trục chính',
+          'Các lăng kính xếp song song cùng một chiều lên trên'
+        ],
+        answer: 1,
+        explain: 'Thấu kính hội tụ gồm các lăng kính nhỏ có đáy hướng về trục chính (ở giữa là khối hai mặt song song). Tia sáng qua lăng kính lệch về đáy nên chùm song song bị hội tụ lại.'
+      },
+      {
+        id: 'l3', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Định nghĩa nào sau đây đúng về tiêu cự f của thấu kính?',
+        options: [
+          'Là khoảng cách từ vật đến quang tâm O',
+          'Là khoảng cách từ ảnh đến thấu kính',
+          'Là khoảng cách từ quang tâm O đến tiêu điểm chính F (f = OF)',
+          'Là bề dày tại phần giữa của thấu kính'
+        ],
+        answer: 2,
+        explain: 'Tiêu cự của thấu kính (kí hiệu f = OF) là khoảng cách từ quang tâm O đến tiêu điểm chính F của thấu kính.'
+      },
+      {
+        id: 'l4', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Trong ba tia sáng đặc biệt qua thấu kính hội tụ, tia tới đi qua tiêu điểm chính F sẽ cho tia ló như thế nào?',
+        options: [
+          'Truyền thẳng không đổi hướng',
+          'Đi qua quang tâm O',
+          'Song song với trục chính',
+          'Hội tụ tại một điểm trên trục chính ở phía trước thấu kính'
+        ],
+        answer: 2,
+        explain: 'Ba tia đặc biệt qua thấu kính hội tụ: qua O -> truyền thẳng; song song trục chính -> qua F; qua F -> tia ló song song với trục chính.'
+      },
+      {
+        id: 'l5', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Chiếu một chùm tia tới song song với trục chính của thấu kính phân kì, chùm tia ló có đặc điểm gì?',
+        options: [
+          'Hội tụ tại tiêu điểm chính F ở phía sau thấu kính',
+          'Phân kì sao cho đường kéo dài của các tia ló cắt nhau tại tiêu điểm chính F',
+          'Tiếp tục truyền song song với trục chính',
+          'Hội tụ ngay tại quang tâm O'
+        ],
+        answer: 1,
+        explain: 'Với thấu kính phân kì, chùm tia tới song song với trục chính cho chùm tia ló phân kì và có đường kéo dài hội tụ tại tiêu điểm chính F.'
+      },
+      {
+        id: 'l6', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Khi vẽ ảnh của một vật qua thấu kính, quy ước biểu diễn ảnh thật và ảnh ảo là gì?',
+        options: [
+          'Ảnh thật vẽ bằng mũi tên nét đứt, ảnh ảo vẽ bằng mũi tên nét liền',
+          'Ảnh thật vẽ bằng mũi tên nét liền, ảnh ảo vẽ bằng mũi tên nét đứt',
+          'Cả ảnh thật và ảnh ảo đều vẽ bằng mũi tên nét liền',
+          'Ảnh thật vẽ bằng đường tròn, ảnh ảo vẽ bằng dấu chấm'
+        ],
+        answer: 1,
+        explain: 'Theo quy ước trong SGK KHTN 9, ảnh thật được biểu diễn bằng mũi tên nét liền, còn ảnh ảo được biểu diễn bằng mũi tên nét đứt.'
+      },
+      {
+        id: 'l7', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Đặt một vật phẳng nhỏ AB vuông góc với trục chính của thấu kính hội tụ, ở ngoài khoảng tiêu cự (d > f). Ảnh A\'B\' thu được có tính chất nào?',
+        options: [
+          'Ảnh thật, ngược chiều với vật',
+          'Ảnh thật, cùng chiều với vật',
+          'Ảnh ảo, cùng chiều và lớn hơn vật',
+          'Ảnh ảo, ngược chiều và nhỏ hơn vật'
+        ],
+        answer: 0,
+        explain: 'Khi vật đặt ngoài khoảng tiêu cự (d > f) trước thấu kính hội tụ, ta luôn thu được ảnh thật, ngược chiều với vật.'
+      },
+      {
+        id: 'l8', lesson: 8, topic: 'Bài 8 · Thấu kính',
+        q: 'Đặt vật AB trước một thấu kính phân kì tại mọi vị trí (trừ sát quang tâm). Ảnh A\'B\' luôn có đặc điểm gì?',
+        options: [
+          'Ảnh thật, ngược chiều, nhỏ hơn vật',
+          'Ảnh ảo, cùng chiều, lớn hơn vật',
+          'Ảnh ảo, cùng chiều, nhỏ hơn vật',
+          'Có thể cho ảnh thật hoặc ảnh ảo tùy khoảng cách d'
+        ],
+        answer: 2,
+        explain: 'Vật đặt ở mọi vị trí trước thấu kính phân kì luôn cho ảnh ảo, cùng chiều và nhỏ hơn vật.'
+      }
+    ];
+
+    const KEYS = ['A', 'B', 'C', 'D'];
+    let audioCtx = null;
+
+    const state = {
+      topic: 'all',
+      useTimer: true,
+      useShuffle: true,
+      soundOn: true,
+      pool: [],
+      index: 0,
+      score: 0,
+      streak: 0,
+      bestStreak: 0,
+      timeLeft: 30,
+      timerId: null,
+      totalSeconds: 0,
+      totalTimerId: null,
+      answered: false,
+      history: [],
+      reviewFilter: 'all'
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function playTone(type) {
+      if (!state.soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'ok') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(175, now + 0.1);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        }
+      } catch (_) {}
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function showView(name) {
+      el('view-lobby').classList.toggle('hidden', name !== 'lobby');
+      el('view-play').classList.toggle('hidden', name !== 'play');
+      el('view-results').classList.toggle('hidden', name !== 'results');
+    }
+
+    function clearTimers() {
+      if (state.timerId) {
+        clearInterval(state.timerId);
+        state.timerId = null;
+      }
+      if (state.totalTimerId) {
+        clearInterval(state.totalTimerId);
+        state.totalTimerId = null;
+      }
+    }
+
+    function startQuiz(customPool) {
+      clearTimers();
+      let base = customPool || QUESTION_BANK.filter(q => state.topic === 'all' || String(q.lesson) === state.topic);
+      state.pool = state.useShuffle ? shuffleArray(base) : [...base];
+      state.index = 0;
+      state.score = 0;
+      state.streak = 0;
+      state.bestStreak = 0;
+      state.totalSeconds = 0;
+      state.history = [];
+      state.totalTimerId = setInterval(() => { state.totalSeconds += 1; }, 1000);
+      showView('play');
+      renderQuestion();
+    }
+
+    function startQuestionTimer() {
+      if (state.timerId) clearInterval(state.timerId);
+      const pill = el('timer-pill');
+      const bar = el('timer-bar');
+      if (!state.useTimer) {
+        pill.textContent = 'Không giới hạn';
+        bar.style.width = `${((state.index + 1) / state.pool.length) * 100}%`;
+        bar.className = 'h-full rounded-full bg-indigo-600 transition-all duration-200';
+        return;
+      }
+      state.timeLeft = 30;
+      pill.textContent = '30s';
+      bar.style.width = '100%';
+      bar.className = 'h-full rounded-full bg-indigo-600 transition-all duration-200';
+
+      state.timerId = setInterval(() => {
+        state.timeLeft -= 1;
+        pill.textContent = `${Math.max(0, state.timeLeft)}s`;
+        bar.style.width = `${Math.max(0, (state.timeLeft / 30) * 100)}%`;
+        if (state.timeLeft <= 7) {
+          bar.className = 'h-full rounded-full bg-rose-500 transition-all duration-200';
+        }
+        if (state.timeLeft <= 0) {
+          clearInterval(state.timerId);
+          state.timerId = null;
+          if (!state.answered) submitAnswer(-1, true);
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      if (state.index >= state.pool.length) {
+        finishQuiz();
+        return;
+      }
+      state.answered = false;
+      const item = state.pool[state.index];
+
+      el('play-progress').textContent = `Câu ${state.index + 1} / ${state.pool.length}`;
+      el('play-topic').textContent = item.topic;
+      el('play-streak').textContent = String(state.streak);
+      el('play-score').textContent = String(state.score);
+      el('q-text').textContent = item.q;
+
+      const diag = el('q-diagram');
+      if (item.svg) {
+        diag.innerHTML = item.svg;
+        diag.classList.remove('hidden');
+        diag.classList.add('flex');
+      } else {
+        diag.innerHTML = '';
+        diag.classList.add('hidden');
+        diag.classList.remove('flex');
+      }
+
+      const fb = el('feedback-box');
+      fb.classList.add('hidden');
+      const nextBtn = el('btn-next');
+      nextBtn.disabled = true;
+      nextBtn.textContent = state.index + 1 === state.pool.length ? 'Xem kết quả' : 'Câu tiếp theo →';
+
+      const grid = el('options-grid');
+      grid.innerHTML = item.options.map((opt, idx) => `
+        <button type="button" data-opt="${idx}" class="opt-choice flex w-full items-start gap-3 rounded-xl border-2 border-slate-200 bg-white p-3.5 text-left text-sm font-medium text-slate-800 transition hover:border-indigo-400 hover:bg-indigo-50/40">
+          <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 font-mono text-xs font-semibold text-slate-600">${KEYS[idx]}</span>
+          <span class="pt-0.5 leading-snug">${opt}</span>
+        </button>
+      `).join('');
+
+      grid.querySelectorAll('.opt-choice').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!state.answered) submitAnswer(Number(btn.dataset.opt), false);
+        });
+      });
+
+      startQuestionTimer();
+    }
+
+    function submitAnswer(chosenIdx, timedOut) {
+      if (state.answered) return;
+      state.answered = true;
+      if (state.timerId) {
+        clearInterval(state.timerId);
+        state.timerId = null;
+      }
+
+      const item = state.pool[state.index];
+      const isOk = !timedOut && chosenIdx === item.answer;
+
+      if (isOk) {
+        state.streak += 1;
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+        const speedBonus = state.useTimer ? state.timeLeft * 2 : 0;
+        state.score += 100 + (state.streak - 1) * 15 + speedBonus;
+        playTone('ok');
+      } else {
+        state.streak = 0;
+        playTone('err');
+      }
+
+      el('play-streak').textContent = String(state.streak);
+      el('play-score').textContent = String(state.score);
+
+      const btns = el('options-grid').querySelectorAll('.opt-choice');
+      btns.forEach((b, j) => {
+        b.disabled = true;
+        b.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/40');
+        const badge = b.querySelector('span');
+        if (j === item.answer) {
+          b.classList.remove('border-slate-200', 'bg-white');
+          b.classList.add('border-emerald-500', 'bg-emerald-50');
+          badge.className = 'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 font-mono text-xs font-semibold text-white';
+        } else if (j === chosenIdx && !isOk) {
+          b.classList.remove('border-slate-200', 'bg-white');
+          b.classList.add('border-rose-500', 'bg-rose-50');
+          badge.className = 'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-600 font-mono text-xs font-semibold text-white';
+        }
+      });
+
+      const fb = el('feedback-box');
+      const fbTitle = el('feedback-title');
+      fb.classList.remove('hidden', 'border-emerald-200', 'bg-emerald-50/70', 'border-rose-200', 'bg-rose-50/70');
+      if (isOk) {
+        fb.classList.add('border-emerald-200', 'bg-emerald-50/70');
+        fbTitle.textContent = 'Chính xác!';
+        fbTitle.className = 'text-sm font-semibold text-emerald-700';
+      } else {
+        fb.classList.add('border-rose-200', 'bg-rose-50/70');
+        fbTitle.textContent = timedOut
+          ? `Hết giờ · Đáp án đúng là ${KEYS[item.answer]}`
+          : `Chưa đúng · Đáp án đúng là ${KEYS[item.answer]}`;
+        fbTitle.className = 'text-sm font-semibold text-rose-700';
+      }
+      el('feedback-explain').textContent = item.explain;
+      el('btn-next').disabled = false;
+
+      state.history.push({
+        item,
+        chosenIdx,
+        timedOut,
+        isOk
+      });
+    }
+
+    function finishQuiz() {
+      clearTimers();
+      showView('results');
+      const total = state.history.length || 1;
+      const correct = state.history.filter(h => h.isOk).length;
+      const pct = Math.round((correct / total) * 100);
+
+      el('res-pct').textContent = `${pct}%`;
+      el('res-score').textContent = String(state.score);
+      el('res-correct').textContent = `${correct} / ${total}`;
+      el('res-streak').textContent = String(state.bestStreak);
+      el('res-time').textContent = `${state.totalSeconds}s`;
+      el('res-subtitle').textContent = pct >= 80
+        ? 'Rất tốt! Bạn nắm vững kiến thức Bài 7 và Bài 8.'
+        : 'Bạn nên xem lại các câu sai bên dưới và bấm Ôn lại câu sai.';
+
+      const wrongCount = total - correct;
+      el('btn-retry-wrong').classList.toggle('hidden', wrongCount === 0);
+      el('copy-toast').classList.add('hidden');
+      state.reviewFilter = 'all';
+      updateReviewTabs();
+      renderReview();
+    }
+
+    function updateReviewTabs() {
+      document.querySelectorAll('.rfilter-btn').forEach(btn => {
+        const active = btn.dataset.rfilter === state.reviewFilter;
+        btn.className = active
+          ? 'rfilter-btn rounded-lg bg-white px-3 py-1.5 text-slate-900 shadow-sm'
+          : 'rfilter-btn rounded-lg px-3 py-1.5 text-slate-600';
+      });
+    }
+
+    function renderReview() {
+      const list = state.history.filter(h => {
+        if (state.reviewFilter === 'wrong') return !h.isOk;
+        if (state.reviewFilter === 'correct') return h.isOk;
+        return true;
+      });
+      if (list.length === 0) {
+        el('review-list').innerHTML = '<div class="rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">Không có câu nào trong mục này.</div>';
+        return;
+      }
+      el('review-list').innerHTML = list.map((h, i) => `
+        <div class="rounded-xl border ${h.isOk ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'} p-4">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="font-medium text-slate-500">${h.item.topic}</span>
+            <span class="font-semibold ${h.isOk ? 'text-emerald-700' : 'text-rose-700'}">${h.isOk ? 'Đúng' : 'Sai'}</span>
+          </div>
+          <p class="mt-1.5 text-sm font-semibold text-slate-900">${h.item.q}</p>
+          <div class="mt-2 text-xs text-slate-700">
+            <div>Đáp án đúng: <span class="font-semibold text-emerald-700">${KEYS[h.item.answer]}. ${h.item.options[h.item.answer]}</span></div>
+            ${!h.isOk ? `<div class="mt-0.5">Bạn chọn: <span class="font-semibold text-rose-700">${h.timedOut ? 'Hết giờ' : KEYS[h.chosenIdx] + '. ' + h.item.options[h.chosenIdx]}</span></div>` : ''}
+          </div>
+          <p class="mt-2 text-xs leading-relaxed text-slate-600">${h.item.explain}</p>
+        </div>
+      `).join('');
+    }
+
+    // Event bindings
+    document.querySelectorAll('.topic-card').forEach(card => {
+      card.addEventListener('click', () => {
+        state.topic = card.dataset.topic;
+        document.querySelectorAll('.topic-card').forEach(c => {
+          const active = c.dataset.topic === state.topic;
+          c.className = active
+            ? 'topic-card rounded-xl border-2 border-indigo-600 bg-indigo-50/70 p-4 text-left transition'
+            : 'topic-card rounded-xl border-2 border-slate-200 bg-white p-4 text-left transition hover:border-slate-300';
+          c.querySelector('div:first-child').className = active ? 'text-sm font-semibold text-indigo-900' : 'text-sm font-semibold text-slate-900';
+          c.querySelector('div:last-child').className = active ? 'mt-1 text-xs text-indigo-700' : 'mt-1 text-xs text-slate-500';
+        });
+      });
+    });
+
+    el('toggle-timer').addEventListener('click', () => {
+      state.useTimer = !state.useTimer;
+      const b = el('timer-badge');
+      b.textContent = state.useTimer ? 'Bật' : 'Tắt';
+      b.className = state.useTimer
+        ? 'rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white'
+        : 'rounded-full bg-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700';
+    });
+
+    el('toggle-shuffle').addEventListener('click', () => {
+      state.useShuffle = !state.useShuffle;
+      const b = el('shuffle-badge');
+      b.textContent = state.useShuffle ? 'Bật' : 'Tắt';
+      b.className = state.useShuffle
+        ? 'rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white'
+        : 'rounded-full bg-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-700';
+    });
+
+    el('btn-sound').addEventListener('click', () => {
+      state.soundOn = !state.soundOn;
+      el('sound-label').textContent = state.soundOn ? 'Âm thanh: Bật' : 'Âm thanh: Tắt';
+      el('sound-icon').className = state.soundOn
+        ? 'inline-block h-2 w-2 rounded-full bg-emerald-500'
+        : 'inline-block h-2 w-2 rounded-full bg-slate-400';
+    });
+
+    el('btn-start').addEventListener('click', () => startQuiz());
+
+    el('btn-next').addEventListener('click', () => {
+      state.index += 1;
+      renderQuestion();
+    });
+
+    el('btn-quit').addEventListener('click', () => {
+      el('quit-modal').classList.remove('hidden');
+      el('quit-modal').classList.add('flex');
+    });
+
+    el('modal-cancel').addEventListener('click', () => {
+      el('quit-modal').classList.add('hidden');
+      el('quit-modal').classList.remove('flex');
+    });
+
+    el('modal-confirm').addEventListener('click', () => {
+      el('quit-modal').classList.add('hidden');
+      el('quit-modal').classList.remove('flex');
+      clearTimers();
+      showView('lobby');
+    });
+
+    el('btn-retry-all').addEventListener('click', () => startQuiz());
+    el('btn-retry-wrong').addEventListener('click', () => {
+      const wrongItems = state.history.filter(h => !h.isOk).map(h => h.item);
+      if (wrongItems.length > 0) startQuiz(wrongItems);
+    });
+    el('btn-home').addEventListener('click', () => showView('lobby'));
+
+    el('btn-copy-res').addEventListener('click', async () => {
+      const total = state.history.length;
+      const correct = state.history.filter(h => h.isOk).length;
+      const text = `Quiz KHTN 9 (Bài 7 & 8): Đúng ${correct}/${total} (${Math.round((correct / total) * 100)}%) · Điểm: ${state.score} · Thời gian: ${state.totalSeconds}s`;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (_) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      el('copy-toast').classList.remove('hidden');
+    });
+
+    document.querySelectorAll('.rfilter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.reviewFilter = btn.dataset.rfilter;
+        updateReviewTabs();
+        renderReview();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (el('view-play').classList.contains('hidden')) return;
+      if (!el('quit-modal').classList.contains('hidden')) return;
+      const key = e.key.toUpperCase();
+      const map = { '1': 0, '2': 1, '3': 2, '4': 3, 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+      if (!state.answered && key in map) {
+        submitAnswer(map[key], false);
+      } else if (state.answered && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        state.index += 1;
+        renderQuestion();
+      }
+    });
+  </script>
+</body>
+</html>
